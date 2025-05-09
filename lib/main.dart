@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:demo/video.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -123,12 +125,13 @@ class _HomePageState extends State<HomePage> {
 
     try {
       final token = await _fetchToken(identity, widget.roomId);
-    await Permission.camera.request();
-      // Create local video track before connecting
-      final videoTrack = await LocalVideoTrack.createCameraTrack();
-
       final room = Room();
-      await room.localParticipant?.publishVideoTrack(videoTrack);
+      // if(Platform.isAndroid) {
+        await Permission.camera.request();
+        // Create local video track before connecting
+        final videoTrack = await LocalVideoTrack.createCameraTrack();
+        await room.localParticipant?.publishVideoTrack(videoTrack);
+      // }
       await room.connect(
         'wss://coturn.focus.ind.in', // your LiveKit server
         token,
@@ -138,8 +141,8 @@ class _HomePageState extends State<HomePage> {
         ),
 
       );
-
       await room.localParticipant?.setCameraEnabled(true);
+
 
       room.addListener(() {
         print('Room state changed');
@@ -159,6 +162,7 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
+  TextEditingController controller = TextEditingController();
   @override
   Widget build(BuildContext context) {
     List<Widget> videoTiles = [];
@@ -173,8 +177,9 @@ class _HomePageState extends State<HomePage> {
     _room?.remoteParticipants.forEach((_, participant) {
       for (var pubTrack in participant.videoTrackPublications) {
         if (pubTrack.subscribed && pubTrack.track != null) {
-          videoTiles.add(VideoTile(videoTrack: pubTrack.track!));
+          videoTiles.add(VideoTile(videoTrack: pubTrack.track! ,identity: participant.identity,));
         }
+        print('remorte participents ${participant.identity}');
       }
     });
 
@@ -213,12 +218,16 @@ class _HomePageState extends State<HomePage> {
           children: [
             ElevatedButton(
               onPressed: () => _joinRoom('user_a'),
-              child: const Text('User A - Create/Join Room'),
+              child: const Text('Bhuvi - Created Room'),
             ),
             const SizedBox(height: 20),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: TextFormField(controller: controller,decoration: const InputDecoration(hintText: 'Enter your name'),),
+            ),
             ElevatedButton(
-              onPressed: () => _joinRoom('user_b'),
-              child: const Text('User B - Join Room'),
+              onPressed: () => _joinRoom(controller.text),
+              child:  Text('Join Room'),
             ),
           ],
         ),
