@@ -1,12 +1,20 @@
 import 'dart:io';
 
+import 'package:demo/utils/size_util.dart';
 import 'package:demo/video.dart';
+import 'package:demo/widgets/m_date_picker.dart';
+import 'package:demo/widgets/m_drop_down.dart';
+import 'package:demo/widgets/main_card.dart';
+import 'package:demo/widgets/pop_up.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:livekit_client/livekit_client.dart';
 import 'package:http/http.dart' as http;
 import 'package:permission_handler/permission_handler.dart';
 
+import 'package:popover/popover.dart';
+
+import 'constant/theme.dart';
 import 'livekit.dart';
 
 void main() {
@@ -20,7 +28,8 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'LiveKit Room 22',
-      home: HomePage(roomId: roomId),
+      home: HomePage(roomId: '22'),
+      theme: MTheme.lightTheme,
       debugShowCheckedModeBanner: false,
     );
   }
@@ -162,7 +171,10 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
+  final GlobalKey _iconKey = GlobalKey();
+
   TextEditingController controller = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     List<Widget> videoTiles = [];
@@ -209,14 +221,20 @@ class _HomePageState extends State<HomePage> {
     }
 
     return Scaffold(
-      appBar: AppBar(title: const Text('LiveKit Room 22')),
+      appBar: AppBar(title: const Text('LiveKit Room 22'), actions: [
+        IconButton(onPressed: (){
+          context.mShowDialog();
+        }, icon: const Icon(Icons.settings)),
+      ],),
       body: Center(
         child: _isConnecting
             ? const CircularProgressIndicator()
             : Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            ElevatedButton(
+            MDateTimePicker(selectedDate: (v){},isDate: true,),
+         MDropdownField<String>(items: ['user_a', 'user_b'],onChanged: (v){},value: 'user_a',hintText: 'dhhvhv',itemLabelBuilder: (item) => item,),
+      ElevatedButton(
               onPressed: () => _joinRoom('user_a'),
               child: const Text('Bhuvi - Created Room'),
             ),
